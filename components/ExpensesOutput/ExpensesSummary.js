@@ -1,18 +1,27 @@
 import { View, Text, StyleSheet } from "react-native";
 import { useCallback } from "react";
+import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import loadFonts from "../../utils/FontHelper";
 
 import { GlobalStyles } from "../../constants/styles";
 
+SplashScreen.preventAutoHideAsync();
+
 function ExpensesSummary({ expenses, periodName }) {
+  const [fontsLoaded] = useFonts({
+    "Inter-Black": require("../../assets/fonts/Inter-Black.otf"),
+    "Inter-SemiBold": require("../../assets/fonts/Inter-SemiBold.otf"),
+    "Inter-Light": require("../../assets/fonts/Inter-Light.otf"),
+    "Inter-Bold": require("../../assets/fonts/Inter-Bold.otf"),
+  });
+
   const onLayoutLoaded = useCallback(async () => {
-    if (loadFonts) {
+    if (fontsLoaded) {
       await SplashScreen.hideAsync();
     }
-  }, [loadFonts]);
+  }, [fontsLoaded]);
 
-  if (!loadFonts) {
+  if (!fontsLoaded) {
     return null;
   }
 
