@@ -1,30 +1,8 @@
 import { View, Text, StyleSheet } from "react-native";
-import { useCallback } from "react";
-import { useFonts } from "expo-font";
-import * as SplashScreen from "expo-splash-screen";
 
 import { GlobalStyles } from "../../constants/styles";
 
-SplashScreen.preventAutoHideAsync();
-
 function ExpensesSummary({ expenses, periodName }) {
-  const [fontsLoaded] = useFonts({
-    "Inter-Black": require("../../assets/fonts/Inter-Black.otf"),
-    "Inter-SemiBold": require("../../assets/fonts/Inter-SemiBold.otf"),
-    "Inter-Light": require("../../assets/fonts/Inter-Light.otf"),
-    "Inter-Bold": require("../../assets/fonts/Inter-Bold.otf"),
-  });
-
-  const onLayoutLoaded = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
   const expensesSum = expenses.reduce((sum, expense) => {
     return sum + expense.amount;
   }, 0);
@@ -32,7 +10,7 @@ function ExpensesSummary({ expenses, periodName }) {
   // toFixed(2) = limited to two decimal places
 
   return (
-    <View style={styles.container} onLayout={onLayoutLoaded}>
+    <View style={styles.container}>
       <Text style={styles.period}>{periodName}</Text>
       <Text style={styles.sum}>${expensesSum.toFixed(2)}</Text>
     </View>

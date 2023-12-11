@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
   textBase: {
     fontSize: 16,
     color: GlobalStyles.colors.primary50,
+    fontFamily: "Inter-SemiBold",
   },
   amountContainer: {
     paddingHorizontal: 12,
@@ -52,5 +53,6 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     textAlign: "center",
     minWidth: 30,
+    fontFamily: "Inter-Bold",
   },
 });
