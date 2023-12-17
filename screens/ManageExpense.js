@@ -1,16 +1,21 @@
 import { useContext, useLayoutEffect } from "react";
 import { StyleSheet, View } from "react-native";
 
+import ExpenseForm from "../components/ManageExpense/ExpenseForm";
 import IconButton from "../components/UI/IconButton";
 import { GlobalStyles } from "../constants/styles";
 import { ExpensesContext } from "../store/expenses-context";
-import ExpenseForm from "../components/ManageExpense/ExpenseForm";
+import { storeExpense } from "../util/http";
 
 function ManageExpense({ route, navigation }) {
   const expensesCtx = useContext(ExpensesContext);
 
   const editedExpenseId = route.params?.expenseId; //route prop comes from components loaded as a screen
   const isEditing = !!editedExpenseId; //adding !! in front of a value turns it into boolean (truthy / falsey)
+
+  const selectedExpense = expensesCtx.expenses.find(
+    (expense) => expense.id === editedExpenseId
+  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -27,31 +32,28 @@ function ManageExpense({ route, navigation }) {
     navigation.goBack();
   }
 
-  function confirmHandler() {
+  function confirmHandler(expenseData) {
     if (isEditing) {
-      expensesCtx.updateExpense(editedExpenseId, {
-        description: "Test!!!!!!!!",
-        amount: 7.99,
-        date: new Date("2023-12-11"),
-      });
+      expensesCtx.updateExpense(editedExpenseId, expenseData);
     } else {
-      expensesCtx.addExpense({
-        description: "Test",
-        amount: 14.99,
-        date: new Date(),
-      });
+      storeExpense(expenseData);
+      expensesCtx.addExpense(expenseData);
     }
-
     navigation.goBack();
   }
 
   return (
     <View style={styles.container}>
-      <ExpenseForm onCancel={cancelHandler} isEditing={isEditing} />
+      <ExpenseForm
+        onCancel={cancelHandler}
+        isEditing={isEditing}
+        onSubmit={confirmHandler}
+        defaultValues={selectedExpense}
+      />
       {isEditing && (
         <View style={styles.deleteContainer}>
           <IconButton
-            icon="trash"
+            icon='trash'
             color={GlobalStyles.colors.error500}
             size={36}
             onPress={deleteExpenseHandler}
