@@ -1,25 +1,61 @@
 import { useContext, useEffect, useState } from "react";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
 
 import ExpensesOutput from "../components/ExpensesOutput/ExpensesOutput";
 import { ExpensesContext } from "../store/expenses-context";
 import { getDateMinusDays } from "../util/date";
 import { fetchExpenses } from "../util/http";
+import Loader from "../components/UI/Loader";
+import ErrorOverlay from "../components/UI/ErrorOverlay";
+
+SplashScreen.preventAutoHideAsync();
 
 function RecentExpenses() {
-  const expensesCtx = useContext(ExpensesContext);
+  const [fontsLoaded] = useFonts({
+    "Inter-Black": require("../assets/fonts/Inter-Black.otf"),
+    "Inter-SemiBold": require("../assets/fonts/Inter-SemiBold.otf"),
+    "Inter-Light": require("../assets/fonts/Inter-Light.otf"),
+    "Inter-Bold": require("../assets/fonts/Inter-Bold.otf"),
+  });
 
-  const [fetchedExpenses, setFetchedExpenses] = useState([]);
+  const [isFetching, setIsFetching] = useState(true);
+  const [error, setError] = useState();
+
+  const expensesCtx = useContext(ExpensesContext);
 
   useEffect(() => {
     async function getExpenses() {
-      const expenses = await fetchExpenses();
-      setFetchedExpenses(expenses);
+      setIsFetching(true);
+      try {
+        const expenses = await fetchExpenses();
+        expensesCtx.setExpenses(expenses);
+      } catch (error) {
+        setError("Could not fetch expenses");
+      }
+
+      if (fontsLoaded) {
+        await SplashScreen.hideAsync();
+        setIsFetching(false);
+      }
     }
 
     getExpenses();
-  }, []);
+  }, [fontsLoaded]);
 
-  const recentExpenses = fetchedExpenses.filter((expense) => {
+  function errorHandler() {
+    setError(null);
+  }
+
+  if (error && !isFetching) {
+    return <ErrorOverlay message={error} onConfirm={errorHandler} />;
+  }
+
+  if (isFetching) {
+    return <Loader />;
+  }
+
+  const recentExpenses = expensesCtx.expenses.filter((expense) => {
     const today = new Date();
     const date7DaysAgo = getDateMinusDays(today, 7);
 
@@ -27,7 +63,7 @@ function RecentExpenses() {
   });
 
   return (
-    <ExpensesOutput expenses={recentExpenses} expensesPeriod='Last 7 days' />
+    <ExpensesOutput expenses={recentExpenses} expensesPeriod="Last 7 days" />
   );
 }
 
